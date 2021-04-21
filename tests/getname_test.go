@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/undeadparrot/demoserver/clients"
 	"github.com/undeadparrot/demoserver/handlers"
 )
 
@@ -21,19 +20,17 @@ func (DummyClient) GetCats(ctx context.Context) []string {
 
 func TestGetName(t *testing.T) {
 
-	dummyClient := &DummyClient{}
-
-	ctx := context.Background()
-	// ctx = context.WithValue(ctx, handlers.EnvKey, "TEST")
-	ctx = context.WithValue(ctx, clients.AlphaClientContextKey, dummyClient)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", "/Scott", nil)
+	req, err := http.NewRequest("GET", "/Scott", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	dummyClient := &DummyClient{}
+	h := &handlers.NameHandler{SecretWord: "Blah", MyAlphaClient: dummyClient}
+
+	handler := http.HandlerFunc(h.GetNameHandler)
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handlers.GetNameHandler)
 	handler.ServeHTTP(rr, req)
 
 	if !strings.Contains(rr.Body.String(), "Scott") {

@@ -12,11 +12,15 @@ type myContextKey string
 const NameKey = myContextKey("name")
 const EnvKey = myContextKey("env")
 
-func GetNameHandler(w http.ResponseWriter, r *http.Request) {
+type NameHandler struct {
+	SecretWord    string
+	MyAlphaClient clients.IAlphaClient
+}
+
+func (h *NameHandler) GetNameHandler(w http.ResponseWriter, r *http.Request) {
 	x0 := r.URL.Path[1:]
 
-	alphaclient := clients.ExtractFromContext(r.Context())
-	cats := alphaclient.GetCats(r.Context())
+	cats := h.MyAlphaClient.GetCats(r.Context())
 
-	fmt.Fprintf(w, "Hi there, I love %s! (%s)", x0, cats)
+	fmt.Fprintf(w, "Hi there, I love %s! (%s) (%s)", x0, cats, h.SecretWord)
 }

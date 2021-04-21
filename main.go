@@ -28,19 +28,14 @@ func main() {
 	}
 
 	alphaClient := &clients.HttpAlphaClient{}
-
-	injectClientsMiddleware := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			ctx := req.Context()
-			ctx = context.WithValue(ctx, clients.AlphaClientContextKey, alphaClient)
-
-			next.ServeHTTP(rw, req.WithContext(ctx))
-		})
+	h := &handlers.NameHandler{
+		SecretWord:    "open sesame",
+		MyAlphaClient: alphaClient,
 	}
 
 	r := mux.NewRouter()
-	r.Use(injectEnvMiddleware, injectClientsMiddleware)
-	r.HandleFunc("/{name}", handlers.GetNameHandler)
+	r.Use(injectEnvMiddleware)
+	r.HandleFunc("/{name}", h.GetNameHandler)
 	http.Handle("/", r)
 	http.ListenAndServe("0.0.0.0:8080", nil)
 
