@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -11,13 +10,6 @@ import (
 	"github.com/undeadparrot/demoserver/handlers"
 )
 
-type DummyClient struct{}
-
-func (DummyClient) GetCats(ctx context.Context) []string {
-	cats := []string{"Pussy meow"}
-	return cats
-}
-
 func TestGetName(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "/Scott", nil)
@@ -25,7 +17,8 @@ func TestGetName(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	dummyClient := &DummyClient{}
+	dummyClient := defaultDummyAlphaClient()
+	dummyClient.GetCatsResponse = []string{"puss puss", "mew mew"}
 	h := &handlers.NameHandler{SecretWord: "Blah", MyAlphaClient: dummyClient}
 
 	handler := http.HandlerFunc(h.GetNameHandler)
